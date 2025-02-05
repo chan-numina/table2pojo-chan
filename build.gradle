@@ -1,52 +1,40 @@
-apply plugin: 'java'
+plugins {
+    id 'java'
+}
 
 repositories {
-    mavenCentral();
+    mavenCentral()
 }
 
-sourceCompatibility = '1.11'
-targetCompatibility = '1.11'
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 dependencies {
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
-    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
-    implementation group: 'commons-cli', name: 'commons-cli', version: '1.5.0'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation 'commons-cli:commons-cli:1.5.0'
 
     // add additional db jars
-    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc8', version: '21.8.0.0'
-    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.31'
-    implementation group: 'org.postgresql', name: 'postgresql', version: '42.5.1'
+    implementation 'com.oracle.database.jdbc:ojdbc8:21.8.0.0'
+    implementation 'mysql:mysql-connector-java:8.0.31'
+    implementation 'org.postgresql:postgresql:42.5.1'
 }
 
-//task fatJar(type: Jar) {
-//    manifest {
-//        attributes 'Main-Class': 'com.baeldung.fatjar.Application'
-//    }
-//    baseName = 'all-in-one-jar'
-//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-//    with jar
-//}
-
-//jar {
-//    manifest {
-//        attributes "Main-Class": "com.kumarvv.table2pojo.Table2Pojo"
-//    }
-//
-//    from {
-//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-//    }
-//}
-
-task fatJar(type: Jar) {
+tasks.register('fatJar', Jar) {
     manifest {
-        attributes 'Implementation-Title': 'table2pojo',
-                'Implementation-Version': 1.0,
-                'Main-Class': 'com.kumarvv.table2pojo.Table2Pojo'
+        attributes(
+            'Implementation-Title': 'table2pojo',
+            'Implementation-Version': '1.0',
+            'Main-Class': 'com.kumarvv.table2pojo.Table2Pojo'
+        )
     }
-    baseName = project.name + '-all'
+    archiveBaseName.set("${project.name}-all")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+    from {
+        configurations.runtimeClasspath.asFileTree.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with(tasks.named('jar').get())
 }
